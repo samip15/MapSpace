@@ -21,6 +21,9 @@ class _ImageInputState extends State<ImageInput> {
   /// open image piker
   Future<void> _chooseGallery() async {
     final image = await _imagePicker.getImage(source: ImageSource.gallery);
+    if (image == null) {
+      return;
+    }
     setState(() {
       _galleryFile = File(image.path);
     });
