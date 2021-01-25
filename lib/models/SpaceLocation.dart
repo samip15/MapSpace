@@ -8,10 +8,8 @@ class SpaceLocation {
   final double latitude;
   final double longitude;
   final String address;
-  SpaceLocation(
-      {@required this.latitude,
-      @required this.longitude,
-      @required this.address});
+  const SpaceLocation(
+      {@required this.latitude, @required this.longitude, this.address});
 }
 
 // place

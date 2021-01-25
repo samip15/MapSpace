@@ -11,11 +11,11 @@ class MapSpace with ChangeNotifier {
   }
 
   /// adding new space to our database
-  void addSpace(String title, File imageFile) {
+  void addSpace(String title, File imageFile, SpaceLocation location) {
     final newSpace = Space(
         id: DateTime.now().toString(),
         title: title,
-        location: null,
+        location: location,
         image: imageFile);
     _spaces.add(newSpace);
     notifyListeners();
@@ -23,7 +23,10 @@ class MapSpace with ChangeNotifier {
     DBHelper.insert("user_spaces", {
       'id': newSpace.id,
       'title': newSpace.title,
-      'image': newSpace.image.path
+      'image': newSpace.image.path,
+      'loo_lat': newSpace.location.latitude,
+      'loo_lng': newSpace.location.longitude,
+      'address': newSpace.location.address,
     });
   }
 
@@ -35,11 +38,20 @@ class MapSpace with ChangeNotifier {
           (item) => Space(
             id: item['id'],
             title: item['title'],
-            location: null,
             image: File(item['image']),
+            location: SpaceLocation(
+              latitude: item['loo_lat'],
+              longitude: item['loo_lng'],
+              address: item['address'],
+            ),
           ),
         )
         .toList();
     notifyListeners();
+  }
+
+  // return map item
+  Space findById(String id) {
+    return _spaces.firstWhere((item) => item.id == id);
   }
 }

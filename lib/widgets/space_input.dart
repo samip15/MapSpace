@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:map_space/helper/location_helper.dart';
+import 'package:map_space/screens/map_screen.dart';
 
 class SpaceInput extends StatefulWidget {
+  final Function saveLocation;
+  const SpaceInput(this.saveLocation);
   @override
   _SpaceInputState createState() => _SpaceInputState();
 }
@@ -13,11 +17,30 @@ class _SpaceInputState extends State<SpaceInput> {
     final locData = await Location().getLocation();
     print(locData.latitude);
     print(locData.longitude);
-    final staticMapImageUrl = LocationHelper.getLocationPreviewImage(
-        latitude: locData.latitude, longitude: locData.longitude);
+    _showPreview(locData.latitude, locData.longitude);
+    widget.saveLocation(locData.latitude, locData.longitude);
+  }
+
+  void _showPreview(double lat, double lng) {
+    final staticMapImageUrl =
+        LocationHelper.getLocationPreviewImage(latitude: lat, longitude: lng);
     setState(() {
       _previewImageUrl = staticMapImageUrl;
     });
+  }
+
+  Future<void> _selectOnMap() async {
+    final LatLng selectedLocation = await Navigator.of(context).push<LatLng>(
+      MaterialPageRoute(
+        builder: (ctx) => MapScreen(
+          isSelecting: true,
+        ),
+      ),
+    );
+    if (selectedLocation == null) {
+      return;
+    }
+    _showPreview(selectedLocation.latitude, selectedLocation.longitude);
   }
 
   @override
@@ -37,6 +60,16 @@ class _SpaceInputState extends State<SpaceInput> {
                   _previewImageUrl,
                   fit: BoxFit.cover,
                   width: double.infinity,
+                  errorBuilder: (ctx, obj, trace) {
+                    return Center(
+                      child: Text("Sorry Api Error!!"),
+                    );
+                  },
+                  loadingBuilder: (ctx, obj, trace) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
                 ),
         ),
         Row(
@@ -49,8 +82,8 @@ class _SpaceInputState extends State<SpaceInput> {
               label: Text("Your Location"),
             ),
             FlatButton.icon(
-              onPressed: () {},
-              icon: Icon(Icons.location_on),
+              onPressed: _selectOnMap,
+              icon: Icon(Icons.map),
               textColor: Theme.of(context).primaryColor,
               label: Text("Select On Map"),
             ),

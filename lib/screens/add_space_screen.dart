@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:map_space/models/SpaceLocation.dart';
 import 'package:map_space/provider/map_space.dart';
 import 'package:map_space/widgets/image_input.dart';
 import 'package:map_space/widgets/space_input.dart';
@@ -15,14 +16,22 @@ class AddSpaceScreen extends StatefulWidget {
 
 class _AddSpaceScreenState extends State<AddSpaceScreen> {
   TextEditingController _titleController = TextEditingController();
+  final TextEditingController _addressContorller = TextEditingController();
   File _imageFile;
+  SpaceLocation _pickedLocation;
 
   void _saveSpace() {
-    if (_titleController.text.isEmpty || _imageFile == null) {
+    if (_titleController.text.isEmpty ||
+        _addressContorller.text.isEmpty ||
+        _imageFile == null) {
       return;
     }
+    final finalLocation = SpaceLocation(
+        latitude: _pickedLocation?.latitude,
+        longitude: _pickedLocation?.longitude,
+        address: _addressContorller.text);
     Provider.of<MapSpace>(context, listen: false)
-        .addSpace(_titleController.text, _imageFile);
+        .addSpace(_titleController.text, _imageFile, finalLocation);
     Navigator.of(context).pop();
   }
 
@@ -30,9 +39,14 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
     _imageFile = getImage;
   }
 
+  void _saveLocation(double lat, double lng) {
+    _pickedLocation = SpaceLocation(latitude: lat, longitude: lng);
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
+    _addressContorller.dispose();
     super.dispose();
   }
 
@@ -60,11 +74,18 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
                   SizedBox(
                     height: 10,
                   ),
+                  TextField(
+                    controller: _addressContorller,
+                    decoration: InputDecoration(labelText: "Enter The Address"),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
                   ImageInput(_selectedImage),
                   SizedBox(
                     height: 10,
                   ),
-                  SpaceInput(),
+                  SpaceInput(_saveLocation),
                 ],
               ),
             ),

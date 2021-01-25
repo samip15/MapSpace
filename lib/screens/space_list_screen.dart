@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:map_space/provider/map_space.dart';
 import 'package:map_space/screens/add_space_screen.dart';
+import 'package:map_space/screens/space_detail_screen.dart';
 import 'package:provider/provider.dart';
 
 class SpaceListScreen extends StatelessWidget {
@@ -35,6 +36,11 @@ class SpaceListScreen extends StatelessWidget {
                       : ListView.builder(
                           itemCount: mapSpace.spaces.length,
                           itemBuilder: (ctx, index) => ListTile(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                  context, SpaceDetailScreen.routeName,
+                                  arguments: mapSpace.spaces[index].id);
+                            },
                             leading: CircleAvatar(
                               backgroundImage:
                                   FileImage(mapSpace.spaces[index].image),
